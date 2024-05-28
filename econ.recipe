@@ -280,7 +280,7 @@ class Economist(BasicNewsRecipe):
             else:
                 self.description = data['image']['cover'][0]['headline']
                 self.cover_url = data['image']['cover'][0]['url']['canonical'].replace('economist.com/',
-                'economist.com/cdn-cgi/image/width=960,quality=80,format=auto/')
+                'economist.com/cdn-cgi/image/width=360,quality=80,format=auto/')
             self.log('Got cover:', self.cover_url, '\n', self.description)
 
             feeds_dict = defaultdict(list)
@@ -310,7 +310,7 @@ class Economist(BasicNewsRecipe):
         def preprocess_html(self, soup):
             for img in soup.findAll('img', src=True):
                 img['src'] = img['src'].replace('economist.com/',
-                    'economist.com/cdn-cgi/image/width=256,quality=80,format=auto/')
+                    'economist.com/cdn-cgi/image/width=360,quality=80,format=auto/')
             return soup
 
         def postprocess_html(self, soup, first_fetch):
