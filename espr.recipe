@@ -162,6 +162,12 @@ class Espresso(BasicNewsRecipe):
         br.addheaders += [('Accept-Language', 'en-GB,en-US;q=0.9,en;q=0.8')]
         return br
 
+    def postprocess_html(self, soup, first_fetch):
+        h1 = soup.find('h1')
+        if h1:
+            h1.name = 'h3'
+        return soup
+
     def economist_return_index(self, ans):
         if not ans:
             raise NoArticles(

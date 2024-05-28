@@ -72,10 +72,10 @@ class TheHindu(BasicNewsRecipe):
         return soup
 
     def postprocess_html(self, soup, first_fetch):
-		h1 = soup.find('h1')
+        h1 = soup.find('h1')
         if h1:
             h1.name = 'h3'
-		return soup
+        return soup
 
     def parse_index(self):
         mag_url = None
