@@ -46,7 +46,7 @@ class toiprint(BasicNewsRecipe):
     encoding = 'utf-8'
     remove_empty_feeds = True
 
-	compress_news_images = True
+    compress_news_images = True
     compress_news_images_auto_size = 3
     compress_news_images_max_size = 10
 
@@ -158,11 +158,11 @@ class toiprint(BasicNewsRecipe):
                 handle_images(h1, soup)
         return soup
 
-	def postprocess_html(self, soup, first_fetch):
-		h1 = soup.find('h1')
+    def postprocess_html(self, soup, first_fetch):
+        h1 = soup.find('h1')
         if h1:
             h1.name = 'h3'
-		return soup
+        return soup
 
     def print_version(self, url):
         return index + '/ArticleZoneJson/' + url.split('_')[-3] + '/' + url + '.json'
