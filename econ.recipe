@@ -313,12 +313,6 @@ class Economist(BasicNewsRecipe):
                     'economist.com/cdn-cgi/image/width=360,quality=80,format=auto/')
             return soup
 
-        def postprocess_html(self, soup, first_fetch):
-            h1 = soup.find('h1')
-            if h1:
-                h1.name = 'h2'
-            return soup
-
         compress_news_images = True
         compress_news_images_auto_size = 5
         compress_news_images_max_size = 15

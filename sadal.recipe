@@ -65,12 +65,6 @@ class LiveMint(BasicNewsRecipe):
             )
         ]
 
-        def postprocess_html(self, soup, first_fetch):
-            h1 = soup.find('h1')
-            if h1:
-                h1.name = 'h2'
-            return soup
-
         if date.today().weekday() == 6:
             def parse_index(self):
                 return []
