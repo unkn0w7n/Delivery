@@ -81,7 +81,7 @@ class toiprint(BasicNewsRecipe):
         feeds_dict = defaultdict(list)
         for link in data:
             sec_name = link['PageTitle']
-            if sec_name == 'Advertisement':
+            if sec_name in {'Advertisement', 'Times Sport', 'Hyderabad Times'}:
                 continue
             self.log(sec_name)
             if 'Articles' in link:
