@@ -97,9 +97,9 @@ jobs:
             echo $arguments | xargs ebook-convert "$recipe_path" "$ebook_path"
             title=$(ebook-meta "${ebook_path}" | grep '^Title *:' |
               sed 's/^Title *: *\(.*\)/\1/')
-            filename="${title}.${ext,,}"
-            echo "Renaming \"$ebook_path\" > \"$filename\""
-            mv "$ebook_path" "$filename"
+            new_ebook_path="${title}.${ext,,}"
+            echo "Renaming \"$ebook_path\" > \"$new_ebook_path\""
+            mv "$ebook_path" "$new_ebook_path"
           }
           while read recipe_path || [ -n "$recipe_path" ]; do
             convert_ebook &
