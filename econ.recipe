@@ -231,8 +231,8 @@ class Economist(BasicNewsRecipe):
 
     if use_archive:
         def parse_index(self):
-            if datetime.today().weekday() != 5:
-                raise ValueError('Not Sat')
+            if datetime.today().weekday() != 6:
+                raise ValueError('Not Sun')
             # return self.economist_test_article()
             # url = 'https://www.economist.com/weeklyedition/archive'
             query = {
@@ -275,12 +275,12 @@ class Economist(BasicNewsRecipe):
                 if region in cov['regionsAllowed']:
                     self.description = cov['headline']
                     self.cover_url = cov['url']['canonical'].replace('economist.com/',
-                        'economist.com/cdn-cgi/image/width=360,quality=80,format=auto/')
+                        'economist.com/cdn-cgi/image/width=600,quality=80,format=auto/')
                     break
             else:
                 self.description = data['image']['cover'][0]['headline']
                 self.cover_url = data['image']['cover'][0]['url']['canonical'].replace('economist.com/',
-                'economist.com/cdn-cgi/image/width=480,quality=80,format=auto/')
+                'economist.com/cdn-cgi/image/width=600,quality=80,format=auto/')
             self.log('Got cover:', self.cover_url, '\n', self.description)
 
             feeds_dict = defaultdict(list)
@@ -310,12 +310,8 @@ class Economist(BasicNewsRecipe):
         def preprocess_html(self, soup):
             for img in soup.findAll('img', src=True):
                 img['src'] = img['src'].replace('economist.com/',
-                    'economist.com/cdn-cgi/image/width=480,quality=80,format=auto/')
+                    'economist.com/cdn-cgi/image/width=600,quality=80,format=auto/')
             return soup
-
-        compress_news_images = True
-        compress_news_images_auto_size = 7
-        compress_news_images_max_size = 18
 
     else: # Load articles from individual article pages {{{
 

@@ -47,8 +47,8 @@ class toiprint(BasicNewsRecipe):
     remove_empty_feeds = True
 
     compress_news_images = True
-    compress_news_images_auto_size = 3
-    compress_news_images_max_size = 10
+    compress_news_images_auto_size = 5
+    compress_news_images_max_size = 15
 
     extra_css = '''
         .sub { color:#202020; }

@@ -23,8 +23,8 @@ class LiveMint(BasicNewsRecipe):
     resolve_internal_links = True
 
     compress_news_images = True
-    compress_news_images_auto_size = 3
-    compress_news_images_max_size = 10
+    compress_news_images_auto_size = 5
+    compress_news_images_max_size = 15
 
     def get_cover_url(self):
         today = date.today().strftime('%d/%m/%Y')
