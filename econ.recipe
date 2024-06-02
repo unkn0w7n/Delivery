@@ -231,8 +231,8 @@ class Economist(BasicNewsRecipe):
 
     if use_archive:
         def parse_index(self):
-            if datetime.today().weekday() != 6:
-                raise ValueError('Not Sun')
+            if datetime.today().weekday() != 5:
+                raise ValueError('Not Sat')
             # return self.economist_test_article()
             # url = 'https://www.economist.com/weeklyedition/archive'
             query = {
