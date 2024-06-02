@@ -58,9 +58,8 @@ class TheHindu(BasicNewsRecipe):
         classes('hide-mobile comments-shares share-page editiondetails')
     ]
 
-    compress_news_images = True
-    compress_news_images_auto_size = 3
-    compress_news_images_max_size = 10
+    compress_news_images_auto_size = 25
+    compress_news_images_max_size = 20
 
     def preprocess_html(self, soup):
         for cap in soup.findAll('p', attrs={'class':'caption'}):

@@ -16,6 +16,7 @@ class TheWeek(BasicNewsRecipe):
     ignore_duplicate_articles = {'url', 'title'}
     remove_attributes = ['style', 'height', 'width']
     masthead_url = 'https://www.theweek.in/content/dam/week/logo/The-Week-Logo-Big.png'
+    compress_news_images_auto_size = 50
 
     keep_only_tags = [classes('article-post section-heading element11-page-content')]
 

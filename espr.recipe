@@ -121,7 +121,7 @@ class Espresso(BasicNewsRecipe):
          'economic, political and cultural developments globally.'
     )
 
-    compress_news_images = True
+    compress_news_images_auto_size = 50
 
     extra_css = '''
         em { color:#202020; }
