@@ -37,8 +37,8 @@ class TheHindu(BasicNewsRecipe):
     no_stylesheets = True
     masthead_url = 'https://www.thehindu.com/theme/images/th-online/thehindu-logo.svg'
     remove_attributes = ['style', 'height', 'width']
-    # compress_news_images = True
-    # compress_news_images_auto_size = 2
+    compress_news_images_auto_size = 25
+    compress_news_images_max_size = 20
 
     extra_css = '''
         .caption {font-size:small; text-align:center;}
@@ -64,8 +64,8 @@ class TheHindu(BasicNewsRecipe):
     def preprocess_html(self, soup):
         for cap in soup.findAll('p', attrs={'class':'caption'}):
             cap.name = 'figcaption'
-        # for img in soup.findAll('img'):
-        #     img['src'] = ''
+        for img in soup.findAll('img', attrs={'data-original':True}):
+            img['src'] = img['data-original']
         for h3 in soup.findAll(**classes('sub-title')):
             h3.name = 'p'
         return soup
