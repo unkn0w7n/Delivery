@@ -70,12 +70,6 @@ class TheHindu(BasicNewsRecipe):
             h3.name = 'p'
         return soup
 
-    def postprocess_html(self, soup, first_fetch):
-        h1 = soup.find('h1')
-        if h1:
-            h1.name = 'h3'
-        return soup
-
     def parse_index(self):
         mag_url = None
         global local_edition
