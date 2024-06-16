@@ -58,8 +58,8 @@ class IndiaToday(BasicNewsRecipe):
             return citem['content'].replace('300', '600')
 
     def parse_index(self):
-        if datetime.today().weekday() != 6:
-            raise ValueError('Not Sun')
+        if datetime.today().weekday() != 0:
+            raise ValueError('Not Mon')
         soup = self.index_to_soup('https://www.indiatoday.in/magazine')
 
         section = None
