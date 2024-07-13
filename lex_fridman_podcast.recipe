@@ -22,13 +22,12 @@ class lexfridman(BasicNewsRecipe):
 
     extra_css = '''
         .ts-name { font-weight:bold; }
-        .ts-timestamp { font-size:small; }
     '''
 
     keep_only_tags = [dict(name='article')]
     remove_tags = [
         dict(name=['svg']),
-        dict(name='div', attrs={'class':'episode-player'})
+        dict(attrs={'class':['episode-player', 'ts-timestamp']})
     ]
 
     if date.today().strftime('%d') != '01':
