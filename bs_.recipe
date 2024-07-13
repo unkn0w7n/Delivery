@@ -119,4 +119,4 @@ class BusinessStandardPrint(BasicNewsRecipe):
 
         body = data['htmlContent'].replace('<br />\r\n\t\t&nbsp;', '<br>')
 
-        return '<html><body>' + cat + title + subhead + auth + lede + caption + '<div><p></p>' + body + '</div></body></html>'
+        return '<html><body>' + cat + title + subhead + auth + lede + caption + '<div><br>' + body + '</div></body></html>'
