@@ -118,7 +118,7 @@ class BusinessStandardPrint(BasicNewsRecipe):
                 caption = '<span>' + data['featuredImageObj']['alt_text'] + '</span></p>'
 
         body = data['htmlContent'].replace('<br />\r\n\t\t&nbsp;', '<br>').replace(
-            'style="border: 1px solid #DDD; margin-right: 10px; padding: 1px; float: left; z-index: 0;" title="Chart" width="445"', ''
+            'style=\"border: 1px solid #DDD; margin-right: 10px; padding: 1px; float: left; z-index: 0;\"', ''
         )
 
         return '<html><body>' + cat + title + subhead + auth + lede + caption + '<div><br>' + body + '</div></body></html>'
