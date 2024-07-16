@@ -20,9 +20,7 @@ class lexfridman(BasicNewsRecipe):
     timefmt = ' [%b, %Y]'
     cover_url = 'https://i.scdn.co/image/ab6765630000ba8a563ebb538d297875b10114b7'
 
-    extra_css = '''
-        .ts-name { font-weight:bold; }
-    '''
+    extra_css = '.ts-name { font-weight:bold; }'
 
     keep_only_tags = [dict(name='article')]
     remove_tags = [
@@ -38,7 +36,8 @@ class lexfridman(BasicNewsRecipe):
             ('Transcripts', 'https://lexfridman.com/feed/podcast/')
         ]
 
-    def print_version(self, url):
+    def get_article_url(self, article):
+        url = BasicNewsRecipe.get_article_url(self, article)
         return url.split('?')[0][:-1] + '-transcript/'
 
     def preprocess_html(self, soup):
