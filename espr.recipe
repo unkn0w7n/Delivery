@@ -90,7 +90,6 @@ def classes(classes):
     return dict(attrs={
         'class': lambda x: x and frozenset(x.split()).intersection(q)})
 
-
 def new_tag(soup, name, attrs=()):
     impl = getattr(soup, 'new_tag', None)
     if impl is not None:
