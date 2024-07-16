@@ -62,3 +62,10 @@ class TheWeek(BasicNewsRecipe):
         for img in soup.findAll('img', attrs={'data-src-web': True}):
             img['src'] = img['data-src-web']
         return soup
+
+    def populate_article_metadata(self, article, soup, first):
+        h1 = soup.find('h1')
+        if h1:
+            p = h1.findNext('p')
+            if p:
+                article.text_summary = article.summary = self.tag_to_string(p)
