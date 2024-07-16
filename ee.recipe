@@ -1,0 +1,129 @@
+from urllib.parse import quote
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class eenadu_ts(BasicNewsRecipe):
+    title = 'ఈనాడు - తెలంగాణ'
+    __author__ = 'unkn0wn'
+    description = 'THE LARGEST CIRCULATED TELUGU DAILY'
+    language = 'te'
+    encoding = 'utf-8'
+    no_stylesheets = True
+    remove_javascript = True
+    masthead_url = 'https://dxxd96tbpm203.cloudfront.net//img/logo.png'
+    remove_attributes = ['style', 'height', 'width']
+    ignore_duplicate_articles = {'url', 'title'}
+    reverse_article_order = True
+    remove_empty_feeds = True
+    simultaneous_downloads = 1
+    art_url = ''
+
+    extra_css = '''
+        img {display:block; margin:0 auto;}
+        blockquote, em {color:#202020;}
+        .pub-t{font-size:small; font-style:italic;}
+    '''
+
+    keep_only_tags = [classes('bookWrapper fullstory')]
+    remove_tags = [classes('ext-link offset-tb1 sshare-c')]
+
+    articles_are_obfuscated = True
+
+    def get_obfuscated_article(self, url):
+        br = self.get_browser()
+        soup = self.index_to_soup(url)
+        link = soup.a['href']
+        skip_sections =[ # add sections you want to skip
+            '/video/', '/videos/', '/multimedia/', 'marathi', 'hindi', 'bangla'
+        ]
+        if any(x in link for x in skip_sections):
+            self.abort_article('skipping video links')
+        self.log('Found ', link)
+        self.art_url = link
+        html = br.open(link).read()
+        return ({ 'data': html, 'url': link })
+
+    resolve_internal_links = True
+    remove_empty_feeds = True
+
+    def get_browser(self, *args, **kw):
+        br = BasicNewsRecipe.get_browser(self, *args, **kw)
+        br.addheaders += [
+            ('Referer', 'https://www.eenadu.net/')
+        ]
+        return br
+
+    def get_cover_url(self):
+        import json
+        from datetime import date
+        today = quote(date.today().strftime('%d/%m/%Y'), safe='')
+        raw = self.index_to_soup(
+            'https://epaper.eenadu.net/Home/GetAllpages?editionid=1&editiondate=' + today, raw=True
+        )
+        for cov in json.loads(raw):
+            if cov['NewsProPageTitle'].lower().startswith('front'):
+                return cov['HighResolution']
+
+    feeds = []
+
+    when = '27' # hours
+    index = 'https://www.eenadu.net'
+    a = 'https://news.google.com/rss/search?q=when:{}h+allinurl:{}&hl=te-IN&gl=IN&ceid=IN:te'
+
+    news = index + '/telugu-news/'
+    news_list = [
+            ('తెలంగాణ ప్రధానాంశాలు',  'ts-top-news'),
+            # ('సంపాదకీయం', 'editorial'),
+            # ('వ్యాఖ్యానం', 'vyakyanam'),
+            ('హైదరాబాద్ జిల్లా వార్తలు', 'districts/Hyderabad'),
+            # ('క్రైమ్', 'crime'),
+            ('పాలిటిక్స్', 'politics'),
+            # ('జాతీయం', 'india'),
+            # ('బిజినెస్', 'business'),
+            # ('అంతర్జాతీయం', 'world'),
+            # ('క్రీడలు', 'sports'),
+            # ('సినిమా', 'movies'),
+            # ('వసుంధర', 'women'),
+            # ('ఈ-నాడు', 'technology'),
+            # ('వెబ్ ప్రత్యేకం', 'explained')
+        ]
+    for n in news_list:
+        news_index = news + n[1] + '/'
+        feeds.append((n[0], a.format(when, quote(news_index, safe=''))))
+    feeds.append(('Other News', a.format(when, quote(news, safe=''))))
+
+
+    art = index +  '/telugu-article/'
+    art_list = [
+            # ('చదువు', 'education'),
+            # ('సుఖీభవ', 'health'),
+            # ('ఆహా', 'recipes'),
+            # ('హాయ్ బుజ్జీ', 'kids-stories'),
+            #('మకరందం', 'devotional'),
+            # ('దేవతార్చన', 'temples'),
+            # ('స్థిరాస్తి', 'real-estate'),
+            # ('కథామృతం', 'kathalu'),
+            # ('సండే మ్యాగజైన్', 'sunday-magazine')
+    ]
+    for x in art_list:
+        art_index = art + x[1] + '/'
+        feeds.append((x[0], a.format(when, quote(art_index, safe=''))))
+    # feeds.append(('Other Articles', a.format(when, quote(art, safe=''))))
+
+    # feeds.append(('ఇతరులు', a.format(when, quote(index, safe=''))))
+    # feeds.append(('ప్రతిభ', a.format(when, 'https://pratibha.eenadu.net/')))
+
+    def populate_article_metadata(self, article, soup, first):
+        article.url = self.art_url
+        article.title = article.title.replace(' - Eenadu', '')
+        desc = soup.find(attrs={'class':'srtdes'})
+        if desc:
+            article.summary = self.tag_to_string(desc)
+            article.text_summary = article.summary
+
+    def preprocess_raw_html(self, raw, *a):
+        import re
+        if '<!--Top Full Story Start -->' in raw:
+            body = re.search(r'<!--Top Full Story Start -->([^~]+?)<!--Tags Start -->', raw)
+            return '<html><body><div>' + body.group(1) + '</div></body></html>'
+        return raw
