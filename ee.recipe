@@ -90,7 +90,7 @@ class eenadu_ts(BasicNewsRecipe):
     for n in news_list:
         news_index = news + n[1] + '/'
         feeds.append((n[0], a.format(when, quote(news_index, safe=''))))
-    feeds.append(('Other News', a.format(when, quote(news, safe=''))))
+    # feeds.append(('Other News', a.format(when, quote(news, safe=''))))
 
 
     art = index +  '/telugu-article/'
