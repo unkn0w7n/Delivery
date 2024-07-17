@@ -105,6 +105,6 @@ class eenadu_ts(BasicNewsRecipe):
             date = parse_date(dt.group(0) + ':00.000000').replace(tzinfo=None)
             if (datetime.now() - date) > timedelta(1.5):
                 self.abort_article('Skipping old article')
-        else:  # may not be an artilce.
+        else:
             self.abort_article('may not be an artilce')
         return soup
