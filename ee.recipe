@@ -1,3 +1,9 @@
+import json
+import re
+from datetime import date, datetime, timedelta
+
+from urllib.parse import quote
+from calibre.utils.date import parse_date
 from calibre.web.feeds.news import BasicNewsRecipe, classes
 
 
@@ -33,9 +39,6 @@ class eenadu_ts(BasicNewsRecipe):
         return br
 
     def get_cover_url(self):
-        import json
-        from datetime import date
-        from urllib.parse import quote
         today = quote(date.today().strftime('%d/%m/%Y'), safe='')
         raw = self.index_to_soup(
             'https://epaper.eenadu.net/Home/GetAllpages?editionid=1&editiondate=' + today, raw=True
@@ -74,7 +77,7 @@ class eenadu_ts(BasicNewsRecipe):
                 url = a['href']
                 if not url.startswith('http'):
                     url = 'https://www.eenadu.net/' + url
-                h = a.find(['h3', 'h2', 'h1'])
+                h = a.find(['h4', 'h3', 'h2', 'h1'])
                 if h:
                     title = self.tag_to_string(h).strip()
                     if 'telugu-news' not in url:
@@ -90,8 +93,18 @@ class eenadu_ts(BasicNewsRecipe):
             article.text_summary = article.summary
 
     def preprocess_raw_html(self, raw, *a):
-        import re
         if '<!--Top Full Story Start -->' in raw:
             body = re.search(r'<!--Top Full Story Start -->([^~]+?)<!--Tags Start -->', raw)
             return '<html><body><div>' + body.group(1) + '</div></body></html>'
         return raw
+
+    def preprocess_html(self, soup):
+        div = soup.find(**classes('pub-t'))
+        if div:
+            dt = re.search(r'\d+.+\d+', self.tag_to_string(div))
+            date = parse_date(dt.group(0) + ':00.000000').replace(tzinfo=None)
+            if (datetime.now() - date) > timedelta(1.5):
+                self.abort_article('Skipping old article')
+        else:  # may not be an artilce.
+            self.abort_article('may not be an artilce')
+        return soup
