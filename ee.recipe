@@ -52,7 +52,14 @@ class eenadu_ts(BasicNewsRecipe):
         section_list = [
             ('తెలంగాణ', 'telangana'),
             ('పాలిటిక్స్', 'politics'),
-            ('జాతీయం', 'india'),
+            # ('జాతీయం', 'india'),
+            # ('సంపాదకీయం', 'editorial'),
+            # ('బిజినెస్', 'business'),
+            # ('క్రైమ్', 'crime'),
+            # ('అంతర్జాతీయం', 'world'),
+            # ('క్రీడలు', 'sports'),
+            # ('సినిమా', 'movies'),
+            # ('వసుంధర', 'women'),
             ('హైదరాబాద్ జిల్లా వార్తలు', 'telangana/districts/hyderabad'),
         ]
 
