@@ -6,7 +6,7 @@ class IndianExpress(BasicNewsRecipe):
     title = u'Indian Express'
     language = 'en_IN'
     __author__ = 'unkn0wn'
-    oldest_article = 1 # days
+    oldest_article = 1.15 # days
     max_articles_per_feed = 50
     encoding = 'utf-8'
     masthead_url = 'https://indianexpress.com/wp-content/themes/indianexpress/images/indian-express-logo-n.svg'
