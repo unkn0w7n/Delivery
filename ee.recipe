@@ -41,11 +41,11 @@ class eenadu_ts(BasicNewsRecipe):
     def get_cover_url(self):
         today = quote(date.today().strftime('%d/%m/%Y'), safe='')
         raw = self.index_to_soup(
-            'https://epaper.eenadu.net/Home/GetAllpages?editionid=1&editiondate=' + today, raw=True
+            'https://epaper.eenadu.net/Login/GetMailEditionPages?Date=' + today, raw=True
         )
         for cov in json.loads(raw):
-            if cov['NewsProPageTitle'].lower().startswith('front'):
-                return cov['HighResolution']
+            if cov['editionID'] == 3:
+                return cov['Path'].replace('\\', '/')
 
     def parse_index(self):
         inx = 'https://www.eenadu.net/'
