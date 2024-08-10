@@ -46,7 +46,8 @@ class IndianExpress(BasicNewsRecipe):
     def parse_index(self):
 
         section_list = [
-            # ('Front Page', 'https://indianexpress.com/print/front-page/'),
+            ('Daily Briefing', 'https://indianexpress.com/section/live-news/'),
+            ('Front Page', 'https://indianexpress.com/print/front-page/'),
             ('India', 'https://indianexpress.com/section/india/'),
             #('Express Network', 'https://indianexpress.com/print/express-network/'),
             #('Delhi Confidential', 'https://indianexpress.com/section/delhi-confidential/'),
