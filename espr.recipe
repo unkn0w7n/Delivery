@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
 '''
 https://www.economist.com/the-world-in-brief
 '''
@@ -11,7 +13,6 @@ from calibre.ptempfile import PersistentTemporaryFile
 from calibre.web.feeds.news import BasicNewsRecipe
 from html5_parser import parse
 from lxml import etree
-from datetime import datetime
 
 
 def E(parent, name, text='', **attrs):
@@ -90,6 +91,7 @@ def classes(classes):
     return dict(attrs={
         'class': lambda x: x and frozenset(x.split()).intersection(q)})
 
+
 def new_tag(soup, name, attrs=()):
     impl = getattr(soup, 'new_tag', None)
     if impl is not None:
@@ -117,10 +119,9 @@ class Espresso(BasicNewsRecipe):
     description = (
         'Espresso is a rich, full-flavoured shot of daily global analysis'
         ' from the editors of The Economist to get you up to speed, fast.'
-         'Maximise your understanding of the most significant business, '
+         ' Maximise your understanding of the most significant business, '
          'economic, political and cultural developments globally.'
     )
-
     compress_news_images_auto_size = 50
 
     extra_css = '''
@@ -152,7 +153,6 @@ class Espresso(BasicNewsRecipe):
     keep_only_tags = [dict(name='article', id=lambda x: not x)]
     no_stylesheets = True
     remove_attributes = ['data-reactid', 'width', 'height']
-    delay = 1
 
     def get_browser(self, *args, **kwargs):
         # Needed to bypass cloudflare
@@ -172,8 +172,6 @@ class Espresso(BasicNewsRecipe):
         return ans
 
     def parse_index(self):
-        if datetime.today().weekday() == 6:
-            raise ValueError('Not Today')
         query = {
             'query': 'query EspressoQuery($ref:String!){espresso:canonical(ref:$ref){...EspressoFragment __typename}}fragment EspressoFragment on Content{id type hasPart(size:1 sort:"datePublished:desc"){parts{id type rubric:description hasPart(sort:"publication.context.position:asc,datePublished:desc"){parts{...ArticleFragment __typename}__typename}__typename}__typename}__typename}fragment ArticleFragment on Content{ad{grapeshot{channels{name __typename}__typename}__typename}articleSection{internal{id title:headline __typename}__typename}audio{main{id duration(format:"seconds")source:channel{id __typename}url{canonical __typename}__typename}__typename}byline dateline dateModified datePublished dateRevised flyTitle:subheadline id image{...ImageInlineFragment ...ImageMainFragment ...ImagePromoFragment __typename}print{title:headline flyTitle:subheadline rubric:description section{id title:headline __typename}__typename}publication{id tegID title:headline flyTitle:subheadline datePublished regionsAllowed url{canonical __typename}__typename}rubric:description source:channel{id __typename}tegID text(format:"json")title:headline type url{canonical __typename}topic contentIdentity{forceAppWebview mediaType articleType __typename}__typename}fragment ImageInlineFragment on Media{inline{url{canonical __typename}width height __typename}__typename}fragment ImageMainFragment on Media{main{url{canonical __typename}width height __typename}__typename}fragment ImagePromoFragment on Media{promo{url{canonical __typename}id width height __typename}__typename}',  # noqa
             'operationName': 'EspressoQuery',
