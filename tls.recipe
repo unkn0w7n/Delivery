@@ -47,11 +47,6 @@ class tls(BasicNewsRecipe):
         if datetime.today().weekday() != 6:
             raise ValueError('Not Sun')
         issue = 'https://www.the-tls.co.uk/issues/current-issue/'
-
-        d = self.recipe_specific_options.get('date')
-        if d and isinstance(d, str):
-            issue = 'https://www.the-tls.co.uk/issues/' + d + '/'
-
         url = 'https://www.the-tls.co.uk/wp-json/tls/v2/contents-page/' + get_id(issue)
         raw = self.index_to_soup(url, raw=True)
         data = json.loads(raw)
