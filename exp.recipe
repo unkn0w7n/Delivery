@@ -22,7 +22,6 @@ class IndianExpress(BasicNewsRecipe):
         blockquote{color:#404040;}
         em, #sub-d{color:#202020; font-style:italic;}
         img {display:block; margin:0 auto;}
-        a[href^="java"] { color:#202020;}
     '''
 
     resolve_internal_links = True
@@ -193,3 +192,22 @@ class IndianExpress(BasicNewsRecipe):
             if (today - date) > timedelta(self.oldest_article):
                 self.abort_article('Skipping old article')
         return soup
+
+    def internal_postprocess_book(self, oeb, opts, log):
+        from calibre.utils.icu import numeric_sort_key
+        if self.resolve_internal_links and self.article_url_map:
+            seen = set()
+            for item in oeb.spine:
+                for a in item.data.xpath('//*[local-name()="a" and @href]'):
+                    if a.get('rel') == 'calibre-downloaded-from':
+                        continue
+                    url = a.get('href')
+                    for curl in self.canonicalize_internal_url(url):
+                        articles = self.article_url_map.get(curl)
+                        if articles:
+                            arelpath = sorted(articles, key=numeric_sort_key)[0]
+                            a.set('href', item.relhref(arelpath))
+                            a.set('style', 'color: $202020;')
+                            if url not in seen:
+                                log.debug(f'Resolved internal URL: {url} -> {arelpath}')
+                                seen.add(url)
