@@ -1,3 +1,4 @@
+#!/usr/bin/env  python
 from calibre.web.feeds.news import BasicNewsRecipe, classes
 from datetime import date, datetime, timedelta
 from calibre.utils.date import parse_date
@@ -21,6 +22,7 @@ class IndianExpress(BasicNewsRecipe):
         blockquote{color:#404040;}
         em, #sub-d{color:#202020; font-style:italic;}
         img {display:block; margin:0 auto;}
+        a[href^="java"] { color:#202020;}
     '''
 
     resolve_internal_links = True
