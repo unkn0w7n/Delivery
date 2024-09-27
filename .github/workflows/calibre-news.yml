@@ -17,7 +17,7 @@ jobs:
     environment: calibre-news
     env:
       publisher: unk
-      author: Cali
+      author: unk
       relay: ${{ secrets.SMTP }}
       port: ${{ secrets.PORT }}
       encrypt: ${{ secrets.ENCRYPT }}
@@ -41,6 +41,18 @@ jobs:
             variable_keys=$(echo ${absences[@]/%/,})
             echo "Missing variable(s): ${variable_keys/%,/}"; exit 1
           fi
+      - name: Set up Python
+        if: ${{ success() }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Calibre
+        if: ${{ success() }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install libegl1 libopengl0 libxcb-cursor0
+          url=https://download.calibre-ebook.com/linux-installer.sh
+          sudo -v && wget -nv -O- $url | sudo sh /dev/stdin
       - name: Retrieving Recipe
         if: ${{ success() }}
         uses: actions/checkout@v4
@@ -55,13 +67,20 @@ jobs:
             recipe_paths[$key]="$recipe_path"
             echo "xxx: ${recipe_paths[@]}"
           }
-          while read recipe_path || [ -n "$recipe_path" ]; do
-            if [ ! -n "$recipe_path" ]; then continue; fi
-            if [ "${recipe_path##*.}" != 'recipe' ]; then
-              recipe_path="$recipe_path".recipe
-            fi
-            add_recipe
-          done < recipe_list.txt
+          if [ -f 'recipe_list.txt' ]; then
+            while read recipe_path || [ -n "$recipe_path" ]; do
+              if [ ! -n "$recipe_path" ]; then continue; fi
+              title="${recipe_path%.recipe}"
+              result="$(ebook-convert --list-recipes | grep "$title" || true)"
+              if [ ! -n "$result" ]; then
+                echo "Recipe \"$recipe_path\" does not exists"; continue
+              fi
+              if [ "${recipe_path##*.}" != 'recipe' ]; then
+                recipe_path="$recipe_path".recipe
+              fi
+              add_recipe
+            done < recipe_list.txt
+          fi
           while read -d '' recipe_path; do
             add_recipe
           done < <(find . -maxdepth 1 -type f -name '*.recipe' -print0)
@@ -75,18 +94,6 @@ jobs:
           if [ $count -eq 0 ]; then
             echo 'No recipe needs processing'; exit 1
           fi
-      - name: Set up Python
-        if: ${{ success() }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install Calibre
-        if: ${{ success() }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install libegl1 libopengl0 libxcb-cursor0
-          url=https://download.calibre-ebook.com/linux-installer.sh
-          sudo -v && wget -nv -O- $url | sudo sh /dev/stdin
       - name: Converting Ebook
         if: ${{ success() }}
         run: |
