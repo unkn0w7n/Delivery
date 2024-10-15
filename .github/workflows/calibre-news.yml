@@ -117,14 +117,17 @@ jobs:
           if [ $count -eq 0 ]; then
             echo 'No ebook needs send'; exit 1
           fi
+          while read -d '' ebook_path; do
+            filename="$(basename "$ebook_path")"
+            file_size=$(du -m "$ebook_path" | cut -f 1)
+            echo "Sending: \"$filename\" (${file_size}MB)"
       - name: Sending Ebook
         if: ${{ success() }}
         run: |
           while read -d '' ebook_path; do
             filename="$(basename "$ebook_path")"
             title="${filename%.*}"
-            file_size=$(du -m "$ebook_path" | cut -f 1)
-            echo "Sending: \"$filename\" (${file_size}MB)"
+            echo "Sending: \"$filename\""
             calibre-smtp -a "${filename}" -r "$relay" --port="$port" \
               -e "${encrypt^^}" -u "$from" -p "$secret" -s "$title" \
               "$from" "$to" "Deliver \"${title}\""
