@@ -26,7 +26,6 @@ class IndianExpress(BasicNewsRecipe):
 
     resolve_internal_links = True
     remove_empty_feeds = True
-    compress_news_images_auto_size = 50
 
     keep_only_tags = [classes('heading-part full-details flat-article-caption body-article')]
     remove_tags = [
@@ -191,4 +190,6 @@ class IndianExpress(BasicNewsRecipe):
             today = datetime.now()
             if (today - date) > timedelta(self.oldest_article):
                 self.abort_article('Skipping old article')
+        for img in soup.findAll('img', attrs={'src':True}):
+            img['src'] = img['src'].split('?')[0] + '?w=400'
         return soup
