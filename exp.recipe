@@ -191,5 +191,5 @@ class IndianExpress(BasicNewsRecipe):
             if (today - date) > timedelta(self.oldest_article):
                 self.abort_article('Skipping old article')
         for img in soup.findAll('img', attrs={'src':True}):
-            img['src'] = img['src'].split('?')[0] + '?w=400'
+            img['src'] = img['src'].split('?')[0] + '?w=600'
         return soup
