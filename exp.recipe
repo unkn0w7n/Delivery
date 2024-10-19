@@ -75,7 +75,7 @@ class IndianExpress(BasicNewsRecipe):
             # ('Laptops', 'https://indianexpress.com/section/technology/laptops/'),
             # ('Mobiles & Tabs', 'https://indianexpress.com/section/technology/mobile-tabs/'),
             # ('Science', 'https://indianexpress.com/section/technology/science/'),
-            ('Movie Review', 'https://indianexpress.com/section/entertainment/movie-review/'),
+            # ('Movie Review', 'https://indianexpress.com/section/entertainment/movie-review/'),
             # ('Premium', 'https://indianexpress.com/about/express-premium/'),
             # ('Research', 'https://indianexpress.com/section/research/'),
         ]
