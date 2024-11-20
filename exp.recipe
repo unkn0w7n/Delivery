@@ -171,7 +171,7 @@ class IndianExpress(BasicNewsRecipe):
                     if p := (art.find("p") or art.find(attrs={"class": "opinion-news-para"})):
                         desc = self.tag_to_string(p)
                     if da := art.find(
-                        "div", attrs={"class": ["date", "o-opin-date", "opinion-date", "my-time"]}
+                        attrs={"class": ["date", "o-opin-date", "opinion-date", "my-time"]}
                     ):
                         date = parse_date(self.tag_to_string(da)).replace(tzinfo=None)
                         today = datetime.now()
