@@ -1,7 +1,7 @@
 #!/usr/bin/env  python
 from datetime import date, datetime, timedelta
-from calibre.web.feeds.news import BasicNewsRecipe, classes
 from calibre.utils.date import parse_date
+from calibre.web.feeds.news import BasicNewsRecipe, classes
 
 
 class IndianExpress(BasicNewsRecipe):
@@ -18,17 +18,20 @@ class IndianExpress(BasicNewsRecipe):
     ignore_duplicate_articles = {"url"}
 
     extra_css = """
-        #img-cap, .ie-authorbox, .author-block, #storycenterbyline {font-size:small;}
-        blockquote{color:#404040;}
-        em, #sub-d{color:#202020; font-style:italic;}
-        img {display:block; margin:0 auto;}
+        .ie-custom-caption, .custom-caption, .ie-authorbox, .author-block, #storycenterbyline .top-opinion { font-size:small; }
+        blockquote { color:#404040; }
+        em, #sub-d, .top-description { color:#202020; font-style:italic; }
+        img { display:block; margin:0 auto; }
     """
 
     resolve_internal_links = True
     remove_empty_feeds = True
 
     keep_only_tags = [
-        classes("heading-part full-details flat-article-caption body-article")
+        classes(
+            'heading-part full-details top-opinion article-main-head top-description '
+            'top-image-part story_details flat-article-caption body-article'
+        )
     ]
     remove_tags = [
         dict(name="div", attrs={"id": "ie_story_comments"}),
@@ -165,7 +168,7 @@ class IndianExpress(BasicNewsRecipe):
                     url = a["href"]
                     title = self.tag_to_string(a)
                     desc = ""
-                    if p := (art.find("p") or art.find(attrs={"class":"opinion-news-para"})):
+                    if p := (art.find("p") or art.find(attrs={"class": "opinion-news-para"})):
                         desc = self.tag_to_string(p)
                     if da := art.find(
                         "div", attrs={"class": ["date", "o-opin-date", "opinion-date", "my-time"]}
@@ -186,20 +189,11 @@ class IndianExpress(BasicNewsRecipe):
         return citem["content"].replace("300", "600")
 
     def preprocess_html(self, soup):
-        if h2 := soup.find("h2"):
+        if h2 := soup.find(attrs={"itemprop": "description"}):
             h2.name = "p"
             h2["id"] = "sub-d"
-        for span in soup.findAll(
-            "span", attrs={"class": ["ie-custom-caption", "custom-caption"]}
-        ):
-            span["id"] = "img-cap"
-        for img in soup.findAll("img"):
-            noscript = img.findParent("noscript")
-            if noscript is not None:
-                lazy = noscript.findPreviousSibling("img")
-                if lazy is not None:
-                    lazy.extract()
-                noscript.name = "div"
+        for img in soup.findAll("img", attrs={"data-src": True}):
+            img["src"] = img["data-src"]
         if span := soup.find("span", content=True, attrs={"itemprop": "dateModified"}):
             date = parse_date(span["content"]).replace(tzinfo=None)
             today = datetime.now()
