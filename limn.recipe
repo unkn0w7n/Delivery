@@ -40,9 +40,8 @@ class LiveMint(BasicNewsRecipe):
         soup = self.index_to_soup('https://epaper.livemint.com/')
         cov = soup.findAll('img', attrs={'src': lambda x: x and x.startswith('/EPAPERIMAGES')})
         for x in cov:
-            if not 'front' in x['src'].lower():
-                continue
-            return 'https://epaper.livemint.com' + x['src'].replace('-S', '')
+            if 'front' in x['src'].lower():
+                return 'https://epaper.livemint.com' + x['src'].replace('-S', '')
 
     extra_css = """
         img {margin:0 auto;}
