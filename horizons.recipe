@@ -26,7 +26,6 @@ class horizons(BasicNewsRecipe):
     ignore_duplicate_articles = {'url'}
     extra_css = 'em{color:#202020;}'
     simultaneous_downloads = 1
-    compress_news_images_auto_size = 25
 
     keep_only_tags = [dict(name='div', attrs={'class': 'article'})]
     remove_tags = [
@@ -48,6 +47,8 @@ class horizons(BasicNewsRecipe):
         return BasicNewsRecipe.get_browser(self, verify_ssl_certificates=False)
 
     def parse_index(self):
+        if not datetime.now().month in [4, 7, 10, 1]:
+            raise ValueError('not month')
         d = self.recipe_specific_options.get('issue_url')
         if d and isinstance(d, str):
             url = d
