@@ -27,7 +27,7 @@ class horizons(BasicNewsRecipe):
     extra_css = 'em{color:#202020;}'
     simultaneous_downloads = 1
     compress_news_images = True
-    compress_news_images_auto_size = 25
+    compress_news_images_auto_size = 50
 
     keep_only_tags = [dict(name='div', attrs={'class': 'article'})]
     remove_tags = [
