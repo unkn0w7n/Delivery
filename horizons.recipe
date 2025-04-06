@@ -49,14 +49,14 @@ class horizons(BasicNewsRecipe):
         return BasicNewsRecipe.get_browser(self, verify_ssl_certificates=False)
 
     def parse_index(self):
-        if not datetime.now().month in [4, 7, 10, 1]:
+        if not (datetime.now().month in [4, 7, 10, 1]) and not (datetime.now().day == 1):
             raise ValueError('not month')
         d = self.recipe_specific_options.get('issue_url')
         if d and isinstance(d, str):
             url = d
         else:
             soup = self.index_to_soup('https://www.cirsd.org/en/horizons')
-            a = soup.find('a', href=True, attrs={'class':'horizon-gallery-box'})
+            a = soup.find('a', href=True, attrs={'class': 'horizon-gallery-box'})
             url = a['href']
             if url.startswith('/'):
                 url = 'https://www.cirsd.org' + url
