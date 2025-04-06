@@ -1,0 +1,168 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+
+import base64
+import json
+import re
+
+from datetime import datetime
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+def make_hlinks(zx):
+    otxt = zx['body']['text']
+    txt = otxt
+    if zx['body'].get('additions'):
+        for ad in zx['body']['additions']:
+            if ad.get('type', '') == 'link':
+                strt = ad['rangeStart']
+                end = ad['rangeStart'] + ad['rangeLength']
+                n_txt = otxt[strt:end]
+                lnk = ad.get('value', '')
+                lnk_txt = f'<a href="{lnk}">{n_txt}</a>'
+                txt = txt.replace(n_txt, lnk_txt)
+    if zx['body'].get('inlineTextStyles'):
+        for sty in zx['body']['inlineTextStyles']:
+            if 'Italic' in sty['textStyle']['fontName']:
+                estrt = sty['rangeStart']
+                eend = sty['rangeStart'] + sty['rangeLength']
+                etxt = otxt[estrt:eend]
+                em_txt = f'<em>{etxt}</em>'
+                txt = txt.replace(etxt, em_txt)
+            if 'Bold' in sty['textStyle']['fontName']:
+                bstrt = sty['rangeStart']
+                bend = sty['rangeStart'] + sty['rangeLength']
+                btxt = otxt[bstrt:bend]
+                b_txt = f'<b>{btxt}</b>'
+                txt = txt.replace(btxt, b_txt)
+    return txt.replace('\n\n', '<div>').replace('\n', '</div>')
+
+
+def make_html(a):
+    typ = a.get('type', '')
+    if typ == 'byline':
+        if 'article-logo' in a['byline'].get('textStyleID', ''):
+            return ''
+        st = ' style="font-size:small;"'
+        return f'<div {st}>{a["byline"]["text"]}</div>'
+    if typ == 'title':
+        return f'<h1>{a["title"]["text"]}</h1>'
+    if typ == 'body':
+        if 'body-h' in a['body'].get('textStyleID', ''):
+            return f'<h4>{a["body"]["text"]}</h4>'
+        return f'<p>{make_hlinks(a)}</p>'
+    if typ == 'image':
+        return f'<img src={a["image"]["url"]}>'
+    if typ == 'caption':
+        st = ' style="font-size:small; text-align: center;"'
+        return f'<div {st}>{a["caption"]["text"]}</div>'
+    if typ == 'listelement':
+        return f'<li>{make_hlinks(a)}</li>'
+    if typ == 'dynamicinset':
+        if a.get('webview') and 'datawrapper-chart-' in a['webview']['value']:
+            dw = re.search(r'datawrapper-chart-(.{5})', a['webview']['value']).group(1)
+            return f'<img src=https://datawrapper.dwcdn.net/{dw}/full.png>'
+    return ''
+
+
+keys = [
+    'ZXlKaGJHY2lPaUpTVXpJMU5pSjk=',
+    'V0Zac2FITjNNWGQzU213MFYza3dSWEJ6Y2xR',
+    'cXd3QmVkQVVOWEhUUWNob3dRWjV6TXdtblhxREtlTWhvUkpsa0I3ZHJqV21iMGt0WkNTY0locTVscElpV2FNeU5KQQ==',
+    'T0RZZ0hBZklvaTdES1drUzhnOEd1bkZOQVhwSkRVT0xkSTJydFFrVEVp',
+    'RTNvOTByZFpIdW5QUjdwMFVMalJtSENuRG9mQWRwVFFkSnRUWGpROWVFRFpUMnhvb29WR2RCcG9WS2hF',
+]
+
+
+class Barrons(BasicNewsRecipe):
+    title = "Barron's Magazine"
+    __author__ = 'unkn0wn'
+    description = (
+        "Barron's is an American weekly magazine/newspaper published by Dow Jones & Company. Founded in 1921 as a sister "
+        "publication to The Wall Street Journal, Barron's covers U.S. financial information, market developments, and "
+        'relevant statistics.'
+    )
+    language = 'en_US'
+    encoding = 'utf-8'
+    ignore_duplicate_articles = {'url'}
+    masthead_url = 'https://www.barrons.com/asset/barrons/images/barrons-logo.png'
+    resolve_internal_links = True
+    delay = 0.5
+
+    recipe_specific_options = {
+        'date': {
+            'short': 'The date of the edition to download (MMM DD, YYYY format)',
+            'long': 'For example, Dec 30, 2024',
+        },
+    }
+
+    def parse_index(self):
+        if datetime.today().weekday() != 6:
+            raise ValueError('Not Sun')
+        index = 'https://barrons.djmedia.djservices.io'
+        theatre = '/apps/barrons/theaters/'
+        archive = self.index_to_soup(
+            index + theatre + 'magazine-archive?screen_ids=magazine-archive',
+            raw=True,
+        )
+
+        feeds = []
+
+        scrn = json.loads(archive)['screens'][0]['frames']
+        self.log(
+            'Available Editions: ',
+            ' | '.join(x['screenIds'][0]['name'][6:] for x in scrn),
+        )
+        for frme in scrn:
+            edition_date = self.recipe_specific_options.get('date')
+            if edition_date and isinstance(edition_date, str):
+                nme = frme['screenIds'][0]['name']
+                if edition_date.lower() not in nme.lower():
+                    continue
+            nme = frme['screenIds'][0]['name']
+            cid = frme['screenIds'][0]['id']
+            bseurl = frme['baseUrl']
+            self.cover_url = frme['image']['url']
+            self.log('Downloading ', nme)
+            self.timefmt = ' [' + nme[6:] + ']'
+            break
+
+        data = json.loads(self.index_to_soup(index + bseurl, raw=True))
+        for x in data['screens'][0]['frames']:
+            if x['type'] != 'article':
+                continue
+            url = index + theatre + cid + '?screen_ids=' + x['articleId']
+            title = x['title']['text']
+            desc = ''
+            if x.get('summary'):
+                desc = x['summary']['text']
+            if x.get('byline'):
+                desc = x['byline']['text'] + ' | ' + desc
+            self.log('          ', title, '\n\t', desc)
+            feeds.append({'title': title, 'description': desc, 'url': url})
+        return [('Articles', feeds)]
+
+    def preprocess_raw_html(self, raw, url):
+        rdata = json.loads(raw)
+        body = ''
+        for x in rdata['screens'][0]['frames']:
+            body += '\n' + make_html(x)
+        return '<html><body>' + body.replace(' _', '') + '</body></html>'
+
+    def get_browser(self, *args, **kw):
+        kw['user_agent'] = 'okhttp/4.12.0'
+        br = BasicNewsRecipe.get_browser(self, *args, **kw)
+        k2 = '.'.join(base64.b64decode(b).decode() for b in keys[:3])
+        k3 = '_'.join(base64.b64decode(v).decode() for v in keys[3:])
+        br.addheaders += [
+            ('Accept-Encoding', 'gzip'),
+            ('App-Identifier', 'com.news.screens'),
+            ('App-Version', 1),
+            ('Device-Type', 'phone'),
+            ('Os-Name', 'Android'),
+            ('X-Access-Token', k2 + '_' + k3),
+        ]
+        return br
+
+    def populate_article_metadata(self, article, soup, first):
+        article.url = 'https://www.barrons.com/articles/' + article.url.split('=')[-1]
