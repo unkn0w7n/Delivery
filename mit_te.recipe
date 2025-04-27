@@ -46,6 +46,7 @@ class MitTechnologyReview(BasicNewsRecipe):
     no_stylesheets = True
     remove_empty_feeds = True
     remove_attributes = ['height', 'width', 'style', 'padding', 'padding-top']
+    resolve_internal_links = True
     delay = 1
     masthead_url = 'https://wp-preprod.technologyreview.com/wp-content/uploads/2021/08/Screen-Shot-2021-08-20-at-11.11.12-AM-e1629473232355.png'
     extra_css = '''
