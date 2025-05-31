@@ -1,8 +1,11 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
 import json
 from datetime import datetime
 
-from calibre.web.feeds.news import BasicNewsRecipe
 from html5_parser import parse
+
+from calibre.web.feeds.news import BasicNewsRecipe
 
 
 class BusinessStandardPrint(BasicNewsRecipe):
@@ -12,8 +15,6 @@ class BusinessStandardPrint(BasicNewsRecipe):
     language = 'en_IN'
     masthead_url = 'https://bsmedia.business-standard.com/include/_mod/site/html5/images/business-standard-logo.png'
     encoding = 'utf-8'
-    resolve_internal_links = True
-    remove_empty_feeds = True
 
     no_stylesheets = True
     remove_javascript = True
@@ -25,7 +26,7 @@ class BusinessStandardPrint(BasicNewsRecipe):
     ignore_duplicate_articles = {'title', 'url'}
     remove_empty_feeds = True
     resolve_internal_links = True
-    compress_news_images_auto_size = 50
+    browser_type = 'webengine'
 
     extra_css = '''
         img {display:block; margin:0 auto;}
@@ -37,15 +38,19 @@ class BusinessStandardPrint(BasicNewsRecipe):
     recipe_specific_options = {
         'date': {
             'short': 'The date of the print edition to download (DD-MM-YYYY format)',
-            'long': 'For example, 20-09-2023'
+            'long': 'For example, 20-09-2023',
         }
     }
 
     def get_cover_url(self):
         d = self.recipe_specific_options.get('date')
         if not (d and isinstance(d, str)):
-            soup = self.index_to_soup('https://www.magzter.com/IN/Business-Standard-Private-Ltd/Business-Standard/Newspaper/')
-            for citem in soup.findAll('meta', content=lambda s: s and s.endswith('view/3.jpg')):
+            soup = self.index_to_soup(
+                'https://www.magzter.com/IN/Business-Standard-Private-Ltd/Business-Standard/Newspaper/'
+            )
+            for citem in soup.findAll(
+                'meta', content=lambda s: s and s.endswith('view/3.jpg')
+            ):
                 return citem['content']
 
     def parse_index(self):
@@ -61,7 +66,7 @@ class BusinessStandardPrint(BasicNewsRecipe):
         if dt.weekday() == 6:
             raise ValueError(
                 'Business Standard Does Not Have A Print Publication On Sunday. The Reports'
-                ' And Columns On This Page Today Appeared In The Newspaper\'s Saturday Edition.'
+                " And Columns On This Page Today Appeared In The Newspaper's Saturday Edition."
             )
         url = 'https://apibs.business-standard.com/category/today-paper?sortBy=' + today
         raw = self.index_to_soup(url, raw=True)
@@ -80,7 +85,7 @@ class BusinessStandardPrint(BasicNewsRecipe):
                 desc = article['sub_heading']
                 url = 'https://www.business-standard.com' + article['article_url']
                 self.log('\t', title, '\n\t', desc, '\n\t\t', url)
-                articles.append({'title': title, 'description':desc, 'url': url})
+                articles.append({'title': title, 'description': desc, 'url': url})
             if articles:
                 feeds.append((section, articles))
         return feeds
@@ -104,37 +109,68 @@ class BusinessStandardPrint(BasicNewsRecipe):
         cat = subhead = lede = auth = caption = ''
 
         if 'defaultArticleCat' in data and data['defaultArticleCat'] is not None:
-            if 'h1_tag' in data['defaultArticleCat'] and data['defaultArticleCat']['h1_tag'] is not None:
+            if (
+                'h1_tag' in data['defaultArticleCat']
+                and data['defaultArticleCat']['h1_tag'] is not None
+            ):
                 cat = '<div class="cat">' + data['defaultArticleCat']['h1_tag'] + '</div>'
 
         if 'metaDescription' in data and data['metaDescription'] is not None:
             subhead = '<p class="sub">' + data['metaDescription'] + '</p>'
             self.art_desc = data['metaDescription']
 
-        date = (datetime.fromtimestamp(int(data['publishDate']))).strftime('%b %d, %Y | %I:%M %p')
+        date = (datetime.fromtimestamp(int(data['publishDate']))).strftime(
+            '%b %d, %Y | %I:%M %p'
+        )
 
         authors = []
-        if 'articleMappedMultipleAuthors' in data:	
+        if 'articleMappedMultipleAuthors' in data:
             for aut in data['articleMappedMultipleAuthors']:
-                authors.append(data['articleMappedMultipleAuthors'][str(aut)]) 
-        auth = '<div><p class="auth">' + ', '.join(authors) + ' | ' + data['placeName'] + ' | ' + date + '</p></div>'
+                authors.append(data['articleMappedMultipleAuthors'][str(aut)])
+        auth = (
+            '<div><p class="auth">'
+            + ', '.join(authors)
+            + ' | '
+            + data['placeName']
+            + ' | '
+            + date
+            + '</p></div>'
+        )
 
         if 'featuredImageObj' in data:
             if 'url' in data['featuredImageObj']:
                 if img_url is not None:
                     lede = '<p class="cap"><img src="{}">'.format(img_url)
                 else:
-                    lede = '<p class="cap"><img src="{}">'.format(data['featuredImageObj']['url'])
+                    lede = '<p class="cap"><img src="{}">'.format(
+                        data['featuredImageObj']['url']
+                    )
             if 'alt_text' in data['featuredImageObj']:
                 caption = '<span>' + data['featuredImageObj']['alt_text'] + '</span></p>'
 
-        body = data['htmlContent'].replace('<br />\r\n\t\t&nbsp;', '<br>')
+        body = data['htmlContent']
 
-        return '<html><body>' + cat + title + subhead + auth + lede + caption + '<div><br>' + body + '</div></body></html>'
+        return (
+            '<html><body>'
+            + cat
+            + title
+            + subhead
+            + auth
+            + lede
+            + caption
+            + '<div><br>'
+            + body
+            + '</div></body></html>'
+        )
 
     def preprocess_html(self, soup):
         for img in soup.findAll('img'):
             img.attrs = {'src': img.get('src', '')}
-        for x in soup.findAll('div'):
+        for x in soup.findAll('div', 'p'):
             x.attrs = {'class': x.get('class', '')}
+        for attr in self.remove_attributes:
+            for x in soup.findAll(attrs={attr: True}):
+                del x[attr]
+        for br in soup.findAll(attrs={'class': lambda x: x and x.startswith('brtag')}):
+            br.name = 'div'
         return soup
