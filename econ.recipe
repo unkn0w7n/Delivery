@@ -252,6 +252,8 @@ class Economist(BasicNewsRecipe):
     # downloaded with connection reset by peer (104) errors.
     delay = 3
 
+    browser_type = 'webengine'
+
     from_archive = False
 
     recipe_specific_options = {
