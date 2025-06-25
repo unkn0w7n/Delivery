@@ -251,11 +251,8 @@ class Economist(BasicNewsRecipe):
     # economist.com has started throttling after about 60% of the total has
     # downloaded with connection reset by peer (104) errors.
     delay = 3
-
     browser_type = 'webengine'
-
-    from_archive = False
-
+    from_archive = True
     recipe_specific_options = {
         'date': {
             'short': 'The date of the edition to download (YYYY-MM-DD format)',
@@ -285,7 +282,7 @@ class Economist(BasicNewsRecipe):
     def get_browser(self, *args, **kwargs):
         if self.from_archive:
             kwargs['user_agent'] = (
-                'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.103 Mobile Safari/537.36 Lamarr'
+                'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.103 Mobile Safari/537.36 Liskov'
             )
             br = BasicNewsRecipe.get_browser(self, *args, **kwargs)
         else:
@@ -341,8 +338,6 @@ class Economist(BasicNewsRecipe):
         return None
 
     def parse_index(self):
-        # if datetime.today().weekday() != 5:
-        #     raise ValueError('Not Sat')
         if self.from_archive:
             return self.parse_web_index()
         edition_date = self.recipe_specific_options.get('date')
