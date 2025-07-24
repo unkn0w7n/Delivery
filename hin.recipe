@@ -15,9 +15,9 @@ def absurl(url):
 
 
 class TheHindu(BasicNewsRecipe):
-    title = 'The Hindu'
+    title = 'The Hindu Print Edition'
     __author__ = 'unkn0wn'
-    description = 'Articles from The Hindu, Today\'s Paper.'
+    description = "Articles from The Hindu, Today's Paper."
     language = 'en_IN'
     no_stylesheets = True
     masthead_url = 'https://www.thehindu.com/theme/images/th-online/thehindu-logo.svg'
@@ -40,7 +40,7 @@ class TheHindu(BasicNewsRecipe):
                      'erode, hyderabad, international, kochi, kolkata,\n'
                      'kozhikode, madurai, mangalore, mumbai, thiruvananthapuram, '
                      'tiruchirapalli, vijayawada, visakhapatnam'),
-            'default': 'chennai'
+            'default': 'hyderabad'
         },
         'date': {
             'short': 'The date of the edition to download (YYYY-MM-DD format)',
@@ -68,7 +68,8 @@ class TheHindu(BasicNewsRecipe):
         return soup
 
     def parse_index(self):
-        local_edition = 'th_chennai'
+        self.title = 'The Hindu'
+        local_edition = 'th_hyderabad'
         d = self.recipe_specific_options.get('location')
         if d and isinstance(d, str):
             local_edition = 'th_' + d
@@ -98,13 +99,13 @@ class TheHindu(BasicNewsRecipe):
         raw = self.index_to_soup(url, raw=True)
         soup = self.index_to_soup(raw)
         ans = self.hindu_parse_index(soup)
-        cover = soup.find(attrs={'class':'hindu-ad'})
-        if cover:
-            self.cover_url = cover.img['src']
         if not ans:
             raise ValueError(
                     'The Hindu Newspaper is not published Today.'
                 )
+        cover = soup.find(attrs={'class':'hindu-ad'})
+        if cover:
+            self.cover_url = cover.img['src']
         if mag_url:
             self.log('\nFetching Magazine')
             soup = self.index_to_soup(mag_url)
@@ -129,13 +130,11 @@ class TheHindu(BasicNewsRecipe):
                 for sec in json.loads(a):
                     for item in data[sec]:
                         section = sec.replace('TH_', '')
-                        if section.lower().startswith('sport'):
-                            continue
                         title = item['articleheadline']
                         url = absurl(item['href'])
                         desc = 'Page no.' + item['pageno'] + ' | ' + item['teaser_text'] or ''
                         self.log('            ', title, '\n\t', url)
-                        feeds_dict[section].append({"title": title, "url": url, "description": desc})
-                return [(section, articles) for section, articles in feeds_dict.items()]
+                        feeds_dict[section].append({'title': title, 'url': url, 'description': desc})
+                return list(feeds_dict.items())
             else:
                 return []
