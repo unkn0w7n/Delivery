@@ -130,6 +130,8 @@ class TheHindu(BasicNewsRecipe):
                 for sec in json.loads(a):
                     for item in data[sec]:
                         section = sec.replace('TH_', '')
+                        if section.lower().startswith('sport'):
+                            continue
                         title = item['articleheadline']
                         url = absurl(item['href'])
                         desc = 'Page no.' + item['pageno'] + ' | ' + item['teaser_text'] or ''
