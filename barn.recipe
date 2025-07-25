@@ -97,8 +97,8 @@ class Barrons(BasicNewsRecipe):
     }
 
     def parse_index(self):
-        if datetime.today().weekday() != 2:
-            raise ValueError('Not Wed')
+        if datetime.today().weekday() != 0:
+            raise ValueError('Not Mon')
         index = 'https://barrons.djmedia.djservices.io'
         theatre = '/apps/barrons/theaters/'
         archive = self.index_to_soup(
