@@ -218,7 +218,7 @@ class Economist(BasicNewsRecipe):
 
     resolve_internal_links = True
 
-    delay = 2
+    delay = 1
     browser_type = 'webengine'
     from_web = True
     recipe_specific_options = {
@@ -273,6 +273,12 @@ class Economist(BasicNewsRecipe):
                 'recipe needs to be updated.'
             )
         return ans
+
+    def economist_test_article(self):
+        self.from_web = False
+        return [('Articles', [{'title': 'test',
+            'url': 'https://www.economist.com/china/2025/09/10/china-is-ditching-the-dollar-fast'
+        }])]
 
     def parse_index(self):
         if datetime.today().weekday() != 5:
