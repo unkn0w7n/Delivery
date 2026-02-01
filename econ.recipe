@@ -218,7 +218,7 @@ class Economist(BasicNewsRecipe):
 
     resolve_internal_links = True
 
-    delay = 5
+    delay = 1
     browser_type = 'webengine'
     from_web = True
     recipe_specific_options = {
@@ -239,15 +239,8 @@ class Economist(BasicNewsRecipe):
     }
 
     def get_browser(self, *args, **kwargs):
-        if self.from_web:
-            kwargs['user_agent'] = (
-                'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.103 Mobile Safari/537.36 Liskov'
-            )
-        else:
-            # kwargs['user_agent'] = 'okhttp/4.12.0'
-            kwargs['user_agent'] = (
-                'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.103 Mobile Safari/537.36 Liskov'
-            )
+        from calibre.utils.random_ua import common_english_word_ua
+        kwargs['user_agent'] = common_english_word_ua()
         br = BasicNewsRecipe.get_browser(self, *args, **kwargs)
         return br
 
@@ -317,7 +310,7 @@ class Economist(BasicNewsRecipe):
                     'economist.com/',
                     'economist.com/cdn-cgi/image/width=960,quality=80,format=auto/',
                 )
-                .replace('SQ_', '')
+                .replace('SQ_', '').replace('_AS', '_AP')
             )
             self.log('Got cover:', self.cover_url)
 
