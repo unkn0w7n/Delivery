@@ -278,7 +278,7 @@ class Economist(BasicNewsRecipe):
         }])]
 
     def parse_index(self):
-        if datetime.today().weekday() != 5:
+        if datetime.today().weekday() != 6:
             raise ValueError('Not Sat')
         # return self.economist_test_article()
         edition_date = self.recipe_specific_options.get('date')
