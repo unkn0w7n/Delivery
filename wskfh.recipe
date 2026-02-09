@@ -34,10 +34,7 @@ class TheWeek(BasicNewsRecipe):
         soup = self.index_to_soup(
             'https://www.magzter.com/IN/Malayala_Manorama/THE_WEEK/Business/'
         )
-        for citem in soup.findAll(
-            'meta', content=lambda s: s and s.endswith('view/3.jpg')
-        ):
-            return citem['content']
+        return soup.find('link', attrs={'rel': 'preload'})['href'].replace('view/2.jpg', 'view/3.jpg')
 
     def parse_index(self):
         if datetime.today().weekday() != 0:
