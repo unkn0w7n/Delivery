@@ -20,6 +20,7 @@ class IndiaToday(BasicNewsRecipe):
     )
     masthead_url = 'https://akm-img-a-in.tosshub.com/sites/all/themes/itg/logo.png'
 
+    compress_news_images = True
     compress_news_images_auto_size = 50
 
     extra_css = '''
