@@ -59,9 +59,10 @@ class TheWeekRecipe(BasicNewsRecipe):
         # Fetch the cover image URL for the magazine issue
         edition_date = self.recipe_specific_options.get('date')
         if not (edition_date and isinstance(edition_date, str)):
-            soup = self.index_to_soup('https://www.magzter.com/IN/Malayala-Manorama/THE-WEEK-India/News')
-            cover_img = soup.find('img', id=lambda s: s and 'mgd__lhd__cover' in s.split())
-            return cover_img['src']
+            soup = self.index_to_soup('https://theweekmagazine.in/collections/weekly-magazine-subscription')
+            cover_img = soup.find('img', attrs={'class': 'product-media__image'})
+            self.log(cover_img)
+            return 'https:' + cover_img['src']
 
     def parse_index(self):
         if datetime.today().weekday() != 0:
