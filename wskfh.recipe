@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8
 import re
+
 from calibre.ebooks.BeautifulSoup import Comment
-from datetime import datetime
 from calibre.web.feeds.news import BasicNewsRecipe, classes
 
 
@@ -29,6 +29,8 @@ class TheWeekRecipe(BasicNewsRecipe):
     remove_attributes = ['style', 'height', 'width']
     masthead_url = 'https://www.theweek.in/content/dam/revamp-week/logo/THE-WEEK-LOGO.jpg'
 
+    browser_type = 'webengine'
+
     keep_only_tags = [classes('articlecontent')]
 
     remove_tags = [
@@ -36,8 +38,7 @@ class TheWeekRecipe(BasicNewsRecipe):
         dict(attrs={'class': lambda cls: cls and 'ad_slot' in cls}),
         dict(attrs={'class': lambda cls: cls and 'article-header__action-block' in cls}),
         classes(
-            'article-header__author-social cmp-social-media__nav advt-pos-wrap '
-            'list-container-wrapper mmtagblock vuuklecomments article-header__author-image'
+            'article-header__author-social cmp-social-media__nav advt-pos-wrap list-container-wrapper mmtagblock vuuklecomments article-header__author-image'
         ),
     ]
 
@@ -61,7 +62,6 @@ class TheWeekRecipe(BasicNewsRecipe):
         if not (edition_date and isinstance(edition_date, str)):
             soup = self.index_to_soup('https://theweekmagazine.in/collections/weekly-magazine-subscription')
             cover_img = soup.find('img', attrs={'class': 'product-media__image'})
-            self.log(cover_img)
             return 'https:' + cover_img['src']
 
     def parse_index(self):
@@ -73,10 +73,9 @@ class TheWeekRecipe(BasicNewsRecipe):
             issue_url = f'https://www.theweek.in/theweek/{edition_date}.html'
         else:
             archive_soup = self.index_to_soup('https://www.theweek.in/magazine-archives.html')
-            issue_url = build_absolute_url(
-                archive_soup.find('a', **classes('cmp-story-list__image-link'))['href']
-            )
-        self.log(issue_url)
+            arch = archive_soup.find('a', attrs={'class': 'cmp-story-list__image-link'})
+            issue_url = build_absolute_url(arch['href'])
+            self.timefmt = ' [' + arch['title'] + ']'
 
         soup = self.index_to_soup(issue_url)
         feeds = []
