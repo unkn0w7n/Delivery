@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+
 import json
 import re
 from datetime import date, datetime, timedelta
@@ -33,34 +36,30 @@ class eenadu_ts(BasicNewsRecipe):
 
     def get_browser(self, *args, **kw):
         br = BasicNewsRecipe.get_browser(self, *args, **kw)
-        br.addheaders += [
-            ('Referer', 'https://www.eenadu.net/')
-        ]
+        br.addheaders += [('Referer', 'https://www.eenadu.net/')]
         return br
 
     def get_cover_url(self):
         today = quote(date.today().strftime('%d/%m/%Y'), safe='')
-        raw = self.index_to_soup(
-            'https://epaper.eenadu.net/Login/GetMailEditionPages?Date=' + today, raw=True
-        )
+        raw = self.index_to_soup('https://epaper.eenadu.net/Home/GetAllpages?editionid=1&editiondate=' + today, raw=True)
         for cov in json.loads(raw):
-            if cov['editionID'] == 3:
-                return cov['Path'].replace('\\', '/')
+            if cov['NewsProPageTitle'].lower().startswith('front'):
+                return cov['HighResolution']
 
     def parse_index(self):
         inx = 'https://www.eenadu.net/'
         section_list = [
             ('తెలంగాణ', 'telangana'),
-            ('పాలిటిక్స్', 'politics'),
+            # ('పాలిటిక్స్', 'politics'),
             # ('జాతీయం', 'india'),
-            # ('సంపాదకీయం', 'editorial'),
-            # ('బిజినెస్', 'business'),
+            ('సంపాదకీయం', 'editorial'),
+            ('బిజినెస్', 'business'),
             # ('క్రైమ్', 'crime'),
             # ('అంతర్జాతీయం', 'world'),
             # ('క్రీడలు', 'sports'),
-            # ('సినిమా', 'movies'),
-            # ('వసుంధర', 'women'),
-            ('హైదరాబాద్ జిల్లా వార్తలు', 'telangana/districts/hyderabad'),
+            ('సినిమా', 'movies'),
+            ('వసుంధర', 'women'),
+            # ('హైదరాబాద్ జిల్లా వార్తలు', 'telangana/districts/hyderabad'),
         ]
 
         feeds = []
@@ -77,7 +76,7 @@ class eenadu_ts(BasicNewsRecipe):
         return feeds
 
     def articles_from_soup(self, soup):
-        div = soup.find('div', attrs={'class':['col-left', 'district-more']})
+        div = soup.find('div', attrs={'class': ['col-left', 'district-more']})
         ans = []
         for link in div.findAll(attrs={'class': ['telugu_uni_body', 'thumb-content-more', 'owl-carousel']}):
             for a in link.findAll('a', attrs={'href': True}):
@@ -94,7 +93,7 @@ class eenadu_ts(BasicNewsRecipe):
         return ans
 
     def populate_article_metadata(self, article, soup, first):
-        desc = soup.find(attrs={'class':'srtdes'})
+        desc = soup.find(attrs={'class': 'srtdes'})
         if desc:
             article.summary = self.tag_to_string(desc)
             article.text_summary = article.summary
