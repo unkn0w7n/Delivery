@@ -21,6 +21,8 @@ class eenadu_ts(BasicNewsRecipe):
     masthead_url = 'https://dxxd96tbpm203.cloudfront.net//img/logo.png'
     remove_attributes = ['style', 'height', 'width']
     ignore_duplicate_articles = {'url', 'title'}
+    compress_news_images = True
+    compress_news_images_auto_size = 8
 
     extra_css = '''
         img {display:block; margin:0 auto;}
