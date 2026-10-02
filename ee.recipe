@@ -18,7 +18,7 @@ class eenadu_ts(BasicNewsRecipe):
     encoding = 'utf-8'
     no_stylesheets = True
     remove_javascript = True
-    masthead_url = 'https://dxxd96tbpm203.cloudfront.net//img/logo.png'
+    masthead_url = 'https://assets.eenadu.net/_assets/_images/logos/logo.webp'
     remove_attributes = ['style', 'height', 'width']
     ignore_duplicate_articles = {'url', 'title'}
     compress_news_images = True
@@ -53,11 +53,11 @@ class eenadu_ts(BasicNewsRecipe):
         section_list = [
             ('తెలంగాణ', 'telangana'),
             # ('పాలిటిక్స్', 'politics'),
-            # ('జాతీయం', 'india'),
+            ('జాతీయం', 'india'),
             ('సంపాదకీయం', 'editorial'),
             ('బిజినెస్', 'business'),
             # ('క్రైమ్', 'crime'),
-            # ('అంతర్జాతీయం', 'world'),
+            ('అంతర్జాతీయం', 'world'),
             # ('క్రీడలు', 'sports'),
             ('సినిమా', 'movies'),
             ('వసుంధర', 'women'),
