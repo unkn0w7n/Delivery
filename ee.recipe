@@ -31,7 +31,7 @@ class eenadu_ts(BasicNewsRecipe):
     '''
 
     keep_only_tags = [classes('bookWrapper fullstory')]
-    remove_tags = [classes('ext-link offset-tb1 sshare-c')]
+    remove_tags = [classes('ext-link offset-tb1 sshare-c gg-pref eenadu-icon')]
 
     resolve_internal_links = True
     remove_empty_feeds = True
@@ -61,6 +61,7 @@ class eenadu_ts(BasicNewsRecipe):
             # ('క్రీడలు', 'sports'),
             ('సినిమా', 'movies'),
             ('వసుంధర', 'women'),
+            ('సండే మ్యాగజైన్', 'sunday-magazine'),
             # ('హైదరాబాద్ జిల్లా వార్తలు', 'telangana/districts/hyderabad'),
         ]
 
@@ -70,9 +71,19 @@ class eenadu_ts(BasicNewsRecipe):
         for section in section_list:
             section_title = section[0]
             section_url = section[1]
-            self.log(section_title)
+            if section_url in {'sunday-magazine'}:
+                if datetime.today().weekday() == 6:
+                    self.log('loading sunday-magazine')
+                else:
+                     continue
+            self.log(section_title, inx + section_url)
             soup = self.index_to_soup(inx + section_url)
-            articles = self.articles_from_soup(soup)
+            if section_url in {'sunday-magazine'}:
+                articles = self.articles_from_sun(soup)
+            if section_url in {'women'}:
+                articles = self.articles_from_wom(soup)
+            else:
+                articles = self.articles_from_soup(soup)
             if articles:
                 feeds.append((section_title, articles))
         return feeds
@@ -81,18 +92,40 @@ class eenadu_ts(BasicNewsRecipe):
         div = soup.find('div', attrs={'class': ['col-left', 'district-more']})
         ans = []
         for link in div.findAll(attrs={'class': ['telugu_uni_body', 'thumb-content-more', 'owl-carousel']}):
-            for a in link.findAll('a', attrs={'href': True}):
-                url = a['href']
-                if not url.startswith('http'):
-                    url = 'https://www.eenadu.net/' + url
-                h = a.find(['h4', 'h3', 'h2', 'h1'])
-                if h:
-                    title = self.tag_to_string(h).strip()
-                    if 'telugu-news' not in url:
-                        continue
-                    self.log('\t', title, '\n\t\t', url)
-                    ans.append({'title': title, 'url': url})
+            ans.extend(self.article_generator(link))
         return ans
+
+    def articles_from_sun(self, soup):
+        ul = soup.find('ul', attrs={'class': 'no-space'})
+        ans = []
+        for link in ul.findAll(attrs={'class': 'telugu_uni_body borderbox-2'}):
+            ans.extend(self.article_generator(link))
+        return ans
+
+    def articles_from_wom(self, soup):
+        div = soup.find('div', attrs={'class': 'vs-cl-2 mb20'})
+        div2 = soup.find('div', attrs={'class': 'vs-cl-3 mb20'})
+        ans = []
+        for link in div.findAll(attrs={'class': ['vs-blg-int']}):
+            ans.extend(self.article_generator(link))
+        for link in div2.findAll(attrs={'class': ['vs-blg-int', 'dear-vasu-blk', 'vs-right-blk']}):
+            ans.extend(self.article_generator(link))
+        return ans
+
+    def article_generator(self, link):
+        ans1 = []
+        for a in link.findAll('a', attrs={'href': True}):
+            url = a['href']
+            if not url.startswith('http'):
+                url = 'https://www.eenadu.net/' + url
+            h = a.find(['h4', 'h3', 'h2', 'h1'])
+            if h:
+                title = self.tag_to_string(h).strip()
+                if 'telugu-news' not in url and 'sunday-magazine' not in url:
+                    continue
+                self.log('\t', title, '\n\t\t', url)
+                ans1.append({'title': title, 'url': url})
+        return ans1
 
     def populate_article_metadata(self, article, soup, first):
         desc = soup.find(attrs={'class': 'srtdes'})
